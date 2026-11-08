@@ -15,8 +15,9 @@ Edit the offer, WhatsApp number, Facebook link and starter ads in `src/content/s
 | Name | What |
 |---|---|
 | `DATABASE_URL` | Neon Postgres connection string. Tables are created on first use. |
-| `TELEGRAM_BOT_TOKEN` | Bot that messages you about new drivers |
-| `TELEGRAM_CHAT_ID` | Your chat id with that bot |
+| `TELEGRAM_BOT_TOKEN` | Bot that posts new drivers (from @BotFather) |
+| `TELEGRAM_CHAT_ID` | Where applications land: the channel, e.g. `@sputnikdrivers` or `-100…` (bot must be a channel admin) |
+| `TELEGRAM_ADMIN_CHAT_ID` | Optional: your private chat id, for the planner link |
 | `PLANNER_SECRET` | Long random string; signs the planner links |
 | `SITE_URL` | `https://sputnik-drivers.vercel.app`, later `https://sputnikdelivery.co.uk` |
 

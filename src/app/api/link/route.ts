@@ -14,6 +14,6 @@ export async function POST() {
   await ensureTables();
   const slot = Math.floor(Date.now() / 600_000);
   const rows = await db`insert into sputnik_link_requests (slot) values (${slot}) on conflict do nothing returning slot`;
-  if (rows.length) await telegram(`📋 Your Sputnik posting planner (valid ${ADMIN_DAYS} days):\n${link}`);
+  if (rows.length) await telegram(`📋 Your Sputnik posting planner (valid ${ADMIN_DAYS} days):\n${link}`, undefined, "admin");
   return Response.json({ ok: true });
 }

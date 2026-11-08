@@ -2,7 +2,7 @@
 
 import { sql, today, visitorId } from "@/lib/db";
 import { telegram } from "@/lib/telegram";
-import { ensureTables, plannerUrl } from "@/lib/sputnik";
+import { ensureTables } from "@/lib/sputnik";
 
 export const runtime = "nodejs";
 
@@ -50,8 +50,15 @@ export async function POST(request: Request) {
     const [ad] = m[2] ? await db`select title from sputnik_ads where id = ${Number(m[2])}` : [];
     if (g) from = `group "${g.name}"${ad ? `, ad "${ad.title}"` : ""}`;
   }
-  const link = plannerUrl();
+  // Checked against the job's requirements, so the channel shows at a glance who fits.
+  const missing = [
+    a.vehicle !== "Yes, my own van" && "no own van",
+    (!a.years || a.years === "Under 2 years") && "under 2 years' experience",
+    a.insurance !== "I have both" && (a.insurance === "Van insurance only" ? "no GIT insurance" : "no van/GIT insurance"),
+    a.licence !== "Yes" && "no full UK licence",
+  ].filter(Boolean);
   const lines = [
+    missing.length ? `⚠️ NOT A MATCH: ${missing.join(", ")}` : "✅ SUITABLE: meets every requirement",
     "🚐 New Sputnik driver application",
     `${a.name} · ${a.phone}${a.email ? ` · ${a.email}` : ""}`,
     [a.years && `Experience: ${a.years}`, a.vehicle && `Van: ${a.vehicle}`, a.insurance && `Insurance: ${a.insurance}`, a.licence && `UK licence: ${a.licence}`]
@@ -64,6 +71,6 @@ export async function POST(request: Request) {
     `Came from ${from}`,
   ].filter(Boolean);
   const wa = `https://wa.me/${digits.startsWith("0") ? `44${digits.slice(1)}` : digits}`;
-  await telegram(lines.join("\n"), [[{ text: "💬 WhatsApp", url: wa }, ...(link ? [{ text: "📋 Planner", url: link }] : [])]]);
+  await telegram(lines.join("\n"), [[{ text: "💬 WhatsApp", url: wa }]]);
   return Response.json({ ok: true });
 }
