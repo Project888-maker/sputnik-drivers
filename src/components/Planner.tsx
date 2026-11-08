@@ -148,6 +148,8 @@ function Today({ state, rules, signup, now, act }: { state: State; rules: Rules;
   const left = Math.max(0, rules.maxPerDay - postedToday.length);
   const lastPost = state.posts[0] ? new Date(state.posts[0].posted_at).getTime() : 0;
   const waitMin = Math.max(0, Math.ceil((lastPost + rules.minGapMinutes * 60_000 - now) / 60_000));
+  // The pause is before copying the next ad; logging a post you've made is never blocked.
+  const waiting = waitMin > 0 && postedToday.length > 0;
 
   const due = useMemo(
     () =>
@@ -180,7 +182,7 @@ function Today({ state, rules, signup, now, act }: { state: State; rules: Rules;
         </p>
         <p className="mt-1 text-sm text-[#aab4c3]">
           {due.length} group{due.length === 1 ? "" : "s"} due.{" "}
-          {waitMin > 0 && postedToday.length > 0 ? `Next post in ${waitMin} min. Spacing posts out keeps your account safe.` : "Copy, open the group, paste, post, then tap “I posted it”."}
+          {waiting ? `Next post in ${waitMin} min. Spacing posts out keeps your account safe.` : "Copy, open the group, paste, post, then tap “I posted it”."}
         </p>
         {!active.length && <p className="mt-3 text-sm text-[#ffb27a]">Add some ads first (Ads tab).</p>}
       </div>
@@ -208,9 +210,11 @@ function Today({ state, rules, signup, now, act }: { state: State; rules: Rules;
                   </pre>
                   <p className="mt-1 text-xs text-[#7f8a9b]">Ad: {ad.title}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button className={primary} onClick={() => copy(g, ad)}>{copied === g.id ? "Copied ✓" : "1. Copy ad"}</button>
+                    <button className={primary} disabled={waiting && copied !== g.id} onClick={() => copy(g, ad)}>
+                      {copied === g.id ? "Copied ✓" : waiting ? `Wait ${waitMin} min` : "1. Copy ad"}
+                    </button>
                     <a className={ghost} href={g.url} target="_blank" rel="noopener">2. Open group</a>
-                    <button className={ghost} disabled={waitMin > 0 && postedToday.length > 0} onClick={() => act("post.log", { group_id: g.id, ad_id: ad.id })}>
+                    <button className={copied === g.id ? primary : ghost} onClick={() => { setCopied(null); act("post.log", { group_id: g.id, ad_id: ad.id }); }}>
                       3. I posted it
                     </button>
                     <button className="px-2 text-sm text-[#7f8a9b] underline" onClick={() => setSwap((s) => ({ ...s, [g.id]: (s[g.id] || 0) + 1 }))}>
