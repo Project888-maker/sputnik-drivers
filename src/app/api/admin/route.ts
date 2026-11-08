@@ -9,10 +9,12 @@
 //   POST { e, k, action: "post.undo", id }
 //   POST { e, k, action: "applicant.save", id, status, note }
 //   POST { e, k, action: "applicant.delete", id }        removes their data for good
+//   POST { e, k, action: "reminder.test" }               sends the 7am reminder now
 
 import { sql } from "@/lib/db";
 import { ensureTables, verifyPlanner } from "@/lib/sputnik";
 import { STARTER_ADS } from "@/content/sputnik";
+import { sendReminder } from "@/lib/reminder";
 
 export const runtime = "nodejs";
 
@@ -106,6 +108,10 @@ export async function POST(request: Request) {
     case "applicant.delete":
       await db`delete from driver_applications where id = ${str(body.id, 40)}`;
       return Response.json({ ok: true });
+    case "reminder.test": {
+      const failed = await sendReminder(true);
+      return failed ? Response.json({ message: failed }, { status: 502 }) : Response.json({ ok: true });
+    }
     default:
       return Response.json({ message: "Unknown action." }, { status: 400 });
   }

@@ -96,10 +96,30 @@ export default function Planner({ e, k, rules, searches, signup }: { e: string; 
       </nav>
       {error && <p className="mb-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
       {tab === "today" && <Today state={state} rules={rules} signup={signup} now={now} act={act} />}
+      {tab === "today" && <TestReminder call={call} />}
       {tab === "groups" && <Groups state={state} rules={rules} searches={searches} act={act} />}
       {tab === "ads" && <Ads state={state} act={act} />}
       {tab === "drivers" && <Drivers state={state} act={act} />}
     </Shell>
+  );
+}
+
+function TestReminder({ call }: { call: (action: string) => Promise<unknown> }) {
+  const [sent, setSent] = useState<"idle" | "sending" | "sent">("idle");
+  return (
+    <div className="mt-6 text-center">
+      <button
+        className={ghost}
+        disabled={sent !== "idle"}
+        onClick={async () => {
+          setSent("sending");
+          setSent((await call("reminder.test")) ? "sent" : "idle");
+        }}
+      >
+        {sent === "sent" ? "Sent. Check Telegram ✓" : sent === "sending" ? "Sending…" : "Send me today's 7am reminder now"}
+      </button>
+      <p className="mt-2 text-xs text-[#7f8a9b]">It arrives on its own every morning at 7am.</p>
+    </div>
   );
 }
 
