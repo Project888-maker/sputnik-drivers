@@ -31,6 +31,9 @@ export async function POST(request: Request) {
 
   switch (body.action) {
     case "state": {
+      // First visit: put the ready-made ads in, so the Today tab works straight away.
+      const [{ n }] = await db`select count(*)::int as n from sputnik_ads`;
+      if (!Number(n)) for (const a of STARTER_ADS) await db`insert into sputnik_ads (title, body) values (${a.title}, ${a.body})`;
       const [groups, ads, posts, applicants] = await Promise.all([
         db`select g.*, (select max(posted_at) from sputnik_posts p where p.group_id = g.id) as last_posted,
              (select ad_id from sputnik_posts p where p.group_id = g.id order by posted_at desc limit 1) as last_ad,
