@@ -1,7 +1,9 @@
 import { neon } from "@neondatabase/serverless";
 import { createHash } from "node:crypto";
 
-export const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
+// Vercel's Neon integration names it SPUTNIK_DRIVERS_DATABASE_URL; DATABASE_URL also works.
+const url = process.env.DATABASE_URL || process.env.SPUTNIK_DRIVERS_DATABASE_URL;
+export const sql = url ? neon(url) : null;
 
 export function today(): string {
   return new Date().toISOString().slice(0, 10);
