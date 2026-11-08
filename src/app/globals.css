@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0b1220;
+  color: #eef2f7;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #ff8a2a;
+  color: #0b1220;
+}
